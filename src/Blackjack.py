@@ -4,12 +4,38 @@ import random
 """ Set a seed for testing purposes """
 random.seed(1)
 
+BUST = " _______   __    __   ______   ________\n" + \
+       "/       \ /  |  /  | /      \ /        |\n" + \
+       "$$$$$$$  |$$ |  $$ |/$$$$$$  |$$$$$$$$/\n" + \
+       "$$ |__$$ |$$ |  $$ |$$ \__$$/    $$ |\n" + \
+       "$$    $$< $$ |  $$ |$$      \    $$ |\n" + \
+       "$$$$$$$  |$$ |  $$ | $$$$$$  |   $$ |\n" + \
+       "$$ |__$$ |$$ \__$$ |/  \__$$ |   $$ |\n" + \
+       "$$    $$/ $$    $$/ $$    $$/    $$ |\n" + \
+       "$$$$$$$/   $$$$$$/   $$$$$$/     $$/\n"
+
+BLACKJACK = " _______   __         ______    ______   __    __     _____   ______    ______   __    __\n" + \
+            "/       \ /  |       /      \  /      \ /  |  /  |   /     | /      \  /      \ /  |  /  |\n" + \
+            "$$$$$$$  |$$ |      /$$$$$$  |/$$$$$$  |$$ | /$$/    $$$$$ |/$$$$$$  |/$$$$$$  |$$ | /$$/\n" + \
+            "$$ |__$$ |$$ |      $$ |__$$ |$$ |  $$/ $$ |/$$/        $$ |$$ |__$$ |$$ |  $$/ $$ |/$$/\n" + \
+            "$$    $$< $$ |      $$    $$ |$$ |      $$  $$<    __   $$ |$$    $$ |$$ |      $$  $$<\n" + \
+            "$$$$$$$  |$$ |      $$$$$$$$ |$$ |   __ $$$$$  \  /  |  $$ |$$$$$$$$ |$$ |   __ $$$$$  \\\n" + \
+            "$$ |__$$ |$$ |_____ $$ |  $$ |$$ \__/  |$$ |$$  \ $$ \__$$ |$$ |  $$ |$$ \__/  |$$ |$$ \\\n" + \
+            "$$    $$/ $$       |$$ |  $$ |$$    $$/ $$ | $$  |$$    $$/ $$ |  $$ |$$    $$/ $$ | $$  |\n" + \
+            "$$$$$$$/  $$$$$$$$/ $$/   $$/  $$$$$$/  $$/   $$/  $$$$$$/  $$/   $$/  $$$$$$/  $$/   $$/\n"
+
+
+
+
+
+
 
 class Game:
     """ Game Class.  Represents the entire game state.  Keeps track of turns and players, as well as the deck. """
 
     def __init__(self):
         self.deck = Deck()
+        self.discarded = []
         self.Num_Players = 1
         self.Players = []
         self.Dealer = Dealer("Dealer")
@@ -59,15 +85,16 @@ class Game:
 
     def new_round(self):
         """ Reset game state but NOT deck. """
-        self.Dealer.has_dealt = False
-        self.Dealer.hand = []
+        self.get_dealer().reset()
         for player in self.get_players():
-            player.Hand = []
+            player.reset()
 
         self.Turn = Turn(self.Dealer)
+        # self.print_game_state()
         self.start_round()
 
     def evaluate_state(self):
+        """ Evaluate the game state.  Says who won, who lost, and who tied.  Prompts for a new round. """
         winning_players = []
         losing_players = []
         tied_players = []
@@ -80,7 +107,7 @@ class Game:
         for player in self.get_players():
             if player.Hand.get_value() < self.get_dealer().Hand.get_value() or player.Hand.get_value() > 21:
                 losing_players.append(player)
-            elif player.Hand.get_value() < self.get_dealer().Hand.get_value():
+            elif player.Hand.get_value() > self.get_dealer().Hand.get_value():
                 winning_players.append(player)
             else:
                 tied_players.append(player)
@@ -97,7 +124,18 @@ class Game:
             for player in tied_players:
                 print("You tied the dealer " + player.Name + ", nothing lost and nothing gained!")
 
+        again = input("Do you want to play another round?  (Yes | No)\n> ").lower()
+        if again == 'yes':
+            self.new_round()
+        elif again == 'no':
+            print("Thanks for playing!")
+        else:
+            print("Please enter a valid option.")
 
+    def check_deck(self):
+        """ If we start to run out of cards, just grab a new deck...basically reshuffle."""
+        if len(self.deck) < 6:
+            self.deck = Deck()
 
 
 class Hand:
@@ -145,11 +183,22 @@ class Hand:
         :return: The hand as a string in the format <value> of <suit>
         """
         hand_string = ""
+        hand_array = []
+        total_hand = ["" for i in range(9)]
+
+        # For every card in my hand, add it's ascii version to an array.
         for card in self.cards:
-            hand_string += card.value + " of " + card.suit + "\n"
+            ascii_card = card.make_card()
+            hand_array.append(ascii_card)
 
-        hand_string += "Value: " + str(self.get_value()) + "\n"
+        # Add all cards row by row to the total hand.
+        for i in range(9):
+            for card_pic in hand_array:
+                total_hand[i] += card_pic[i] + " "
 
+        hand_string += '\n'.join(total_hand)
+
+        # Return picture version of hand
         return hand_string
 
 
@@ -166,6 +215,7 @@ class Turn:
         }
 
     def advance_turn(self):
+        game.check_deck()
         if isinstance(self.Player, Dealer):
             self.Player = game.get_players()[self.player_index]
 
@@ -183,7 +233,10 @@ class Turn:
         # Just in case
         # assert(self.Player is Dealer, "Not a dealer in dealer_turn.  What?")
         if self.Player.Hand.get_value() >= 17:
-            self.stand()
+            game.evaluate_state()
+        else:
+            if self.Player.Hand.get_value() < 17:
+                self.hit()
 
     def player_turn(self):
         print("It's player " + self.Player.Name + "'s turn!")
@@ -210,12 +263,15 @@ class Turn:
 
         # If under 21, allow player to take another turn.  Otherwise, they bust or have 21.
         if self.Player.Hand.get_value() < 21:
-            self.player_turn()
+            if isinstance(self.Player, Player):
+                self.player_turn()
+            else:
+                self.dealer_turn()
         elif self.Player.Hand.get_value() > 21:
-            print("BUST")
+            print(BUST)
             self.advance_turn()
         else:
-            print("BLACKJACK!!!!")
+            print(BLACKJACK)
 
     def stand(self):
         """ A player or the Dealer stands.  Advance to next turn. """
@@ -247,6 +303,9 @@ class Player:
     def draw_card(self):
         self.Hand.add_card(game.deck[0])
         game.deck.remove(game.deck[0])
+
+    def reset(self):
+        self.Hand = Hand()
 
 
 class Dealer(Player):
@@ -284,6 +343,10 @@ class Dealer(Player):
         self.has_dealt = True
 
         # print("Current deck length is : {}".format(len(game.deck)))
+
+    def rest(self):
+        self.Hand = Hand()
+        self.has_dealt = False
 
 
 print("Welcome to Blackjack!\n")

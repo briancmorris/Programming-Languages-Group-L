@@ -60,9 +60,44 @@ class Card:
         self.suit = suit
         self.score = CARD_VALUES[self.value]
         self.faceDown = False
+        self.symbol_dict = {'Hearts': '\u2665', 'Diamonds': '\u2666', 'Spades': '\u2660', 'Clubs': '\u2663'}
 
     def __repr__(self):
-        return str(self.value) + " of " + self.suit
+        ascii_card = '\n'.join(self.make_card())
+        return ascii_card
+
+    def make_card(self):
+        two_digit = False
+        value = VALUE_BY_NAME[self.value]
+
+        # Formatting Boolean
+        if value == 10:
+            two_digit = True
+
+        # If a face card, we want just the capital letter.
+        if value > 10:
+            value = self.value[0]
+        suit = self.suit
+        ascii_card = []
+        space = " "
+        suit_symbol = self.symbol_dict[suit]
+        if two_digit:
+            space = ""
+
+        # Helps see formatting.  Prints space between quotes.
+        # print('Space is: ' + "\"" + space + "\"")
+
+        ascii_card.append('┌───────────────┐')
+        ascii_card.append('│{}{}           │'.format(space, value))
+        ascii_card.append('│             │')
+        ascii_card.append('│             │')
+        ascii_card.append('│     {}       │'.format(suit_symbol))
+        ascii_card.append('│             │')
+        ascii_card.append('│             │')
+        ascii_card.append('│           {}{}│'.format(space, value))
+        ascii_card.append('└───────────────┘')
+        return ascii_card
+
 
 
 class Deck:
