@@ -2,7 +2,7 @@ from Card_Game_Base import *
 import random
 
 """ Set a seed for testing purposes """
-random.seed(1)
+# random.seed(1)
 
 BUST = " _______   __    __   ______   ________\n" + \
        "/       \ /  |  /  | /      \ /        |\n" + \
@@ -23,11 +23,6 @@ BLACKJACK = " _______   __         ______    ______   __    __     _____   _____
             "$$ |__$$ |$$ |_____ $$ |  $$ |$$ \__/  |$$ |$$  \ $$ \__$$ |$$ |  $$ |$$ \__/  |$$ |$$ \\\n" + \
             "$$    $$/ $$       |$$ |  $$ |$$    $$/ $$ | $$  |$$    $$/ $$ |  $$ |$$    $$/ $$ | $$  |\n" + \
             "$$$$$$$/  $$$$$$$$/ $$/   $$/  $$$$$$/  $$/   $$/  $$$$$$/  $$/   $$/  $$$$$$/  $$/   $$/\n"
-
-
-
-
-
 
 
 class Game:
@@ -105,9 +100,10 @@ class Game:
             print(player.Name + ": " + str(player.Hand.get_value()))
 
         for player in self.get_players():
-            if player.Hand.get_value() < self.get_dealer().Hand.get_value() or player.Hand.get_value() > 21:
+            if (player.Hand.get_value() < self.get_dealer().Hand.get_value() <= 21) or player.Hand.get_value() > 21:
                 losing_players.append(player)
-            elif player.Hand.get_value() > self.get_dealer().Hand.get_value():
+            elif player.Hand.get_value() > self.get_dealer().Hand.get_value() or \
+                            self.get_dealer().Hand.get_value() > 21:
                 winning_players.append(player)
             else:
                 tied_players.append(player)
@@ -124,10 +120,10 @@ class Game:
             for player in tied_players:
                 print("You tied the dealer " + player.Name + ", nothing lost and nothing gained!")
 
-        again = input("Do you want to play another round?  (Yes | No)\n> ").lower()
-        if again == 'yes':
+        again = input("Do you want to play another round?  ((Y)es | (N)o)\n> ").lower()
+        if again == 'yes' or again == 'y':
             self.new_round()
-        elif again == 'no':
+        elif again == 'no' or again == 'n':
             print("Thanks for playing!")
         else:
             print("Please enter a valid option.")
@@ -209,10 +205,7 @@ class Turn:
         self.Turn_Number = 0
         self.Player = player
         self.player_index = 0
-        self.action_table = {
-            "hit": self.hit,
-            "stand": self.stand
-        }
+        self.action_table = dict(hit=self.hit, stand=self.stand, h=self.hit, s=self.stand)
 
     def advance_turn(self):
         game.check_deck()
@@ -239,20 +232,24 @@ class Turn:
                 self.hit()
 
     def player_turn(self):
-        print("It's player " + self.Player.Name + "'s turn!")
-        action = ""
-        acceptable_input = False
-        while not acceptable_input:
-            action = input("What would you like to do?\nHit  |  Stand\n>  ").lower()
-            if action == "hit" or action == "stand":
-                acceptable_input = True
-            else:
-                print("\nPlease enter a valid action!\n")
+        if self.Player.Hand.get_value() == 21:
+            print(BLACKJACK)
+            self.advance_turn()
+        else:
+            print("It's player " + self.Player.Name + "'s turn!")
+            action = ""
+            acceptable_input = False
+            while not acceptable_input:
+                action = input("What would you like to do?\n(H)it  |  (S)tand\n>  ").lower()
+                if action == "hit" or action == "stand" or action == 'h' or action == 's':
+                    acceptable_input = True
+                else:
+                    print("\nPlease enter a valid action!\n")
 
-        print("\n")
+            print("\n")
 
-        # Basically a switch case.  Take an action, run dictionary functions based on action-key
-        self.action_table[action]()
+            # Basically a switch case.  Take an action, run dictionary functions based on action-key
+            self.action_table[action]()
 
     def hit(self):
         """ A player or the Dealer hits.  Draw a card from deck, add to their hand."""
@@ -263,15 +260,22 @@ class Turn:
 
         # If under 21, allow player to take another turn.  Otherwise, they bust or have 21.
         if self.Player.Hand.get_value() < 21:
-            if isinstance(self.Player, Player):
+            if not isinstance(self.Player, Dealer):
                 self.player_turn()
             else:
                 self.dealer_turn()
         elif self.Player.Hand.get_value() > 21:
             print(BUST)
-            self.advance_turn()
+            if not isinstance(self.Player, Dealer):
+                self.advance_turn()
+            else:
+                game.evaluate_state()
         else:
             print(BLACKJACK)
+            if not isinstance(self.Player, Dealer):
+                self.advance_turn()
+            else:
+                game.evaluate_state()
 
     def stand(self):
         """ A player or the Dealer stands.  Advance to next turn. """

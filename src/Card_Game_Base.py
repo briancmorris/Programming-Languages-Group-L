@@ -75,7 +75,7 @@ class Card:
             two_digit = True
 
         # If a face card, we want just the capital letter.
-        if value > 10:
+        if value > 10 or value == 1:
             value = self.value[0]
         suit = self.suit
         ascii_card = []
