@@ -133,10 +133,9 @@ class Turn:
         self.Player = player
         self.player_index = 0
         self.action_table = dict(draw=self.draw, discard=self.discard, bartok=self.bartok, dr=self.draw,
-                                 di=self.discard, b=self.bartok, j=self.play_jack, q=self.play_queen,
-                                 k=self.play_king)
+                                 di=self.discard, b=self.bartok)
 
-    def advance_turn(self, effect):
+    def advance_turn(self):
         # Check if we need more cards.
         game.check_deck()
 
@@ -144,27 +143,13 @@ class Turn:
         if self.player_index >= len(game.get_players()):
             self.Player = game.get_players()[0]
             self.player_index = 1
-            self.player_turn(effect)
+            self.player_turn()
         else:
             self.Player = game.get_players()[self.player_index]
             self.player_index += 1
-            self.player_turn(effect)
+            self.player_turn()
 
-    def player_turn(self, effect):
-        if effect == "jack":
-            print("You had to draw 1 card.")
-            self.Player.draw_card()
-        elif effect == "queen":
-            print("Skipped.")
-            self.advance_turn(None)
-            # SKIP
-        elif effect == "king":
-            print("You had to draw 2 cards and got skipped.")
-            self.Player.draw_card()
-            self.Player.draw_card()
-            self.advance_turn(None)
-            # SKIP
-
+    def player_turn(self):
         print("It's player " + self.Player.Name + "'s turn!")
         action = ""
         acceptable_input = False
@@ -173,7 +158,6 @@ class Turn:
             discarded_top = game.discarded.pop()
             print(discarded_top)
             game.discarded.append(discarded_top)
-
             print("Your hand is:")
             print(self.Player.Hand)
             action = input(
@@ -200,7 +184,7 @@ class Turn:
     def draw(self):
         """ Draws a card for the current player. """
         self.Player.draw_card();
-        self.advance_turn(None)
+        self.advance_turn()
 
     def discard(self):
         """ Discards a card for the current player. """
@@ -210,7 +194,7 @@ class Turn:
         # Check bounds.
         if discard_int < 0 or discard_int > len(self.Player.Hand.cards) - 1:
             print("Invalid card index, please try again!")
-            self.player_turn(None)
+            self.player_turn()
 
         discard_card = self.Player.Hand.cards[discard_int]
         discard_pile_top = game.discarded.pop()
@@ -224,106 +208,16 @@ class Turn:
         else:
             print("This card does not share the same suit or value as the top of the discard pile!")
             print("Please try again!")
-            self.player_turn(None)
+            self.player_turn()
 
         # Check if the player has Bartok or has won. Else, go to the next player.
         if len(self.Player.Hand.cards) == 1:
             self.bartok()
-            self.advance_turn(None)
+            self.advance_turn()
         elif len(self.Player.Hand.cards) == 0:
             game.evaluate_state()
         else:
-            self.advance_turn(None)
-
-    def play_jack(self):
-        discard = input("What card is the jack would you like to discard? (number)")
-        discard_int = int(discard)
-        if discard_int < 0 or discard_int > len(self.Player.Hand.cards) - 1:
-            print("Invalid card index, please try again!")
-            self.player_turn(None)
-
-        discard_card = self.Player.Hand.cards[discard_int]
-        discard_pile_top = game.discarded.pop()
-        game.discarded.append(discard_pile_top)
-
-        # Check if the card is valid to be discarded.
-        if discard_card.suit == discard_pile_top.suit:
-            self.Player.discard_card(discard_int)
-        elif discard_card.value == discard_pile_top.value:
-            self.Player.discard_card(discard_int)
-        else:
-            print("This card does not share the same suit or value as the top of the discard pile!")
-            print("Please try again!")
-            self.player_turn(None)
-
-        # Check if the player has Bartok or has won. Else, go to the next player.
-        if len(self.Player.Hand.cards) == 1:
-            self.bartok()
-            self.advance_turn("jack")
-        elif len(self.Player.Hand.cards) == 0:
-            game.evaluate_state()
-        else:
-            self.advance_turn("jack")
-
-    def play_queen(self):
-        discard = input("What card is the queen would you like to discard? (number)")
-        discard_int = int(discard)
-        if discard_int < 0 or discard_int > len(self.Player.Hand.cards) - 1:
-            print("Invalid card index, please try again!")
-            self.player_turn(None)
-
-        discard_card = self.Player.Hand.cards[discard_int]
-        discard_pile_top = game.discarded.pop()
-        game.discarded.append(discard_pile_top)
-
-        # Check if the card is valid to be discarded.
-        if discard_card.suit == discard_pile_top.suit:
-            self.Player.discard_card(discard_int)
-        elif discard_card.value == discard_pile_top.value:
-            self.Player.discard_card(discard_int)
-        else:
-            print("This card does not share the same suit or value as the top of the discard pile!")
-            print("Please try again!")
-            self.player_turn(None)
-
-        # Check if the player has Bartok or has won. Else, go to the next player.
-        if len(self.Player.Hand.cards) == 1:
-            self.bartok()
-            self.advance_turn("queen")
-        elif len(self.Player.Hand.cards) == 0:
-            game.evaluate_state()
-        else:
-            self.advance_turn("queen")
-
-    def play_king(self):
-        discard = input("What card is the king would you like to discard? (number)")
-        discard_int = int(discard)
-        if discard_int < 0 or discard_int > len(self.Player.Hand.cards) - 1:
-            print("Invalid card index, please try again!")
-            self.player_turn(None)
-
-        discard_card = self.Player.Hand.cards[discard_int]
-        discard_pile_top = game.discarded.pop()
-        game.discarded.append(discard_pile_top)
-
-        # Check if the card is valid to be discarded.
-        if discard_card.suit == discard_pile_top.suit:
-            self.Player.discard_card(discard_int)
-        elif discard_card.value == discard_pile_top.value:
-            self.Player.discard_card(discard_int)
-        else:
-            print("This card does not share the same suit or value as the top of the discard pile!")
-            print("Please try again!")
-            self.player_turn(None)
-
-        # Check if the player has Bartok or has won. Else, go to the next player.
-        if len(self.Player.Hand.cards) == 1:
-            self.bartok()
-            self.advance_turn("king")
-        elif len(self.Player.Hand.cards) == 0:
-            game.evaluate_state()
-        else:
-            self.advance_turn("king")
+            self.advance_turn()
 
     def bartok(self):
         """Claims Bartok for a Player"""
@@ -383,7 +277,7 @@ class Game:
             print(player.Hand)
 
         # Make it the dealer's turn
-        self.Turn.advance_turn(None)
+        self.Turn.advance_turn()
 
     def reset(self):
         """ Reset game state. """
