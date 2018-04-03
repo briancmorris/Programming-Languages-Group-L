@@ -34,7 +34,7 @@ class Player(object):
     self.next = next
 
   def play(self, prevPlay):
-    validPlays = self.game.validPlays(self.hand, prevPlay)
+    validPlays = self.game.validPlays(self, prevPlay)
     # if nothing can be played return the empty list. this is lisp like because empty list is false
     if not self.AI:
       played = self.humanFunction(self, validPlays, prevPlay)
