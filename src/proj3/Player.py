@@ -43,36 +43,6 @@ class Player(object):
 
     return played
 
-    # if type(played) is list or type(played) is tuple:
-    #   self.hand = [card for card in self.hand if card not in played]
-    # elif type(played) is Card:
-    #   print("removing cards")
-    #   self.hand = [card for card in self.hand if not card == played]
-    # return played
-
-  # def humanPlay(self, allowed):
-  #   print("Your current hand is {}".format(self.hand))
-  #   if len(allowed) == 0:
-  #     print("You had to draw.")
-  #     myStr = "placeholder"
-  #     while myStr != "":
-  #       myStr = input("Press Enter to acknowledge...")
-  #     self.drawCard()
-  #     return None
-  #   print("You can do the following:")
-  #
-  #   for index, card in enumerate(allowed):
-  #     print("{} {}".format(index, card.__repr__()))
-  #   tbp = None
-  #   while tbp is None:
-  #     try:
-  #       selected = int(input("Enter the index of the move you make: "))
-  #       tbp = allowed[selected] if selected >= 0 else []
-  #     except (ValueError, IndexError):
-  #       print("Invalid selection")
-  #       tbp = None
-  #   return tbp
-
   def drawCard(self):
     try:
       if not self.game.deck.cardsLeft():

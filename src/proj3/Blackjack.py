@@ -42,10 +42,8 @@ class Blackjack(Game):
       print("No one tied this round!")
 
   # Defined for Blackjack
-  def validPlays(self, player):
+  def validPlays(self, player, lastPlayed):
     validPlays = []
-    # print (hand)
-    # print (lastPlayed)
 
     if player.calculateScore() > 21:
       # Redundant but helps sort things out mentally
@@ -78,7 +76,7 @@ class Blackjack(Game):
       if player.AI:
         return player
 
-  def defineAI(self, player, allowed):
+  def defineAI(self, player, allowed, prevPlay):
     # AI logic goes here!
     print("Dealer's hand is {}".format(player.hand))
     print("Dealer's current hand score is {}".format(player.score))
@@ -95,7 +93,7 @@ class Blackjack(Game):
 
     return played
 
-  def defineHuman(self, player, allowed):
+  def defineHuman(self, player, allowed, prevPlay):
     print("Your current hand is {}".format(player.hand))
     print("Your current hand score is {}".format(player.score))
     print("You can do the following:")

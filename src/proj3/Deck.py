@@ -5,8 +5,6 @@ import random
 class Deck(object):
   def __init__(self):
     self.cards = [Card(rank, suit) for suit in suits for rank in ranks]
-    print("DEBUG")
-    print (self.cards)
     self.cards = self.cards[0:53]
     self.shuffle()
 
