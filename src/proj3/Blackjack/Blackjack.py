@@ -78,5 +78,46 @@ class Blackjack(Game):
       if player.AI:
         return player
 
+  def defineAI(self, player, allowed):
+    # AI logic goes here!
+    print("Dealer's hand is {}".format(player.hand))
+    print("Dealer's current hand score is {}".format(player.score))
+    if player.calculateScore() >= 17:
+      played = "stand"
+    else:
+      played = "hit"
+
+    print("Player {}s". format(played))
+    if played == "hit":
+      player.drawCard()
+    else:
+      player.finished = True
+
+    return played
+
+  def defineHuman(self, player, allowed):
+    print("Your current hand is {}".format(player.hand))
+    print("Your current hand score is {}".format(player.score))
+    print("You can do the following:")
+    for action, i in zip(allowed, range(0,len(allowed))):
+      print("{} {}".format(i, action))
+    # for index, card in enumerate(allowed):
+    #   print("{} {}".format(index, card))
+    tbp = None
+    while tbp is None:
+      try:
+        selected = int(input("Enter the index of the move you make: "))
+        tbp = allowed[selected] if selected >= 0 else []
+      except (ValueError, IndexError):
+        print("Invalid selection")
+        tbp = None
+
+    print("Player {}s". format(tbp))
+    if tbp == "hit":
+      player.drawCard()
+    else:
+      player.finished = True
+
+    return tbp
 
 Blackjack(numPlayers=1, numAI=1).play()

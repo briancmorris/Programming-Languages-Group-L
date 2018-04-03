@@ -33,6 +33,9 @@ class Game(object):
     [self.players.append(Player(len(self.players), game=self, AI=len(self.players) >= numPlayers)) for i in
      range(numPlayers + numAI)]
 
+    for player in self.players:
+      self.defineMoves(player)
+
     for i in range(len(self.players)):
       self.players[i].setPrev(self.players[i - 1])
       self.players[i].setNext(self.players[(i + 1) % len(self.players)])
@@ -62,6 +65,12 @@ class Game(object):
     print("+++++++++++++++++++++++++++deck refilled from discarded +++++++++++++++")
     print(self.played)
 
+  def defineMoves(self, player):
+    if player.AI:
+      player.AIFunction = self.defineAI
+    else:
+      player.humanFunction = self.defineHuman
+
   def endCondition(self):
     raise Exception("implemention must define this")
 
@@ -78,6 +87,12 @@ class Game(object):
     raise Exception("implemention must define this")
 
   def winMessage(self):
+    raise Exception("implementation must define this")
+
+  def defineAI(self, player):
+    raise Exception("implementation must define this")
+
+  def defineHuman(self, player, allowed):
     raise Exception("implementation must define this")
 
   def __str__(self):

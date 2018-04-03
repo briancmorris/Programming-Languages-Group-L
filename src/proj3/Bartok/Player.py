@@ -13,6 +13,9 @@ class Player(object):
     self.score = 0
     self.AI = AI
     self.finished = False
+    self.AIFunction = None
+    self.humanFunction = None
+    self.skipped = False
 
   def setPrev(self, prev):
     """
@@ -34,31 +37,9 @@ class Player(object):
     validPlays = self.game.validPlays(self.hand, prevPlay)
     # if nothing can be played return the empty list. this is lisp like because empty list is false
     if not self.AI:
-      played = self.humanPlay(validPlays)
-      if played is None:
-        played = prevPlay
-
-
+      played = self.humanFunction(self, validPlays, prevPlay)
     else:
-        # AI logic goes here!
-        if len(validPlays) > 0:
-          played = validPlays[0]
-          print("played %s" % played.__repr__())
-        else:
-          self.drawCard()
-          return prevPlay
-
-    if type(played) is Card:
-      self.hand = [card for card in self.hand if not card == played]
-
-      if played.rank == "K":
-        self.next.finished = True
-        self.next.drawCard()
-        self.next.drawCard()
-      elif played.rank == "Q":
-        self.next.finished = True
-      elif played.rank == "J":
-        self.next.drawCard()
+      played = self.AIFunction(self, validPlays, prevPlay)
 
     return played
 
@@ -69,29 +50,28 @@ class Player(object):
     #   self.hand = [card for card in self.hand if not card == played]
     # return played
 
-  def humanPlay(self, allowed):
-    print("Your current hand is {}".format(self.hand))
-    #print("Your current hand score is {}".format(self.score))
-    if len(allowed) == 0:
-      print("You had to draw.")
-      self.drawCard()
-      return None
-    print("You can do the following:")
-
-    #for action, i in zip(allowed, range(0,len(allowed))):
-      #print("{} {}".format(i, action))
-    for index, card in enumerate(allowed):
-      print("{} {}".format(index, card.__repr__()))
-    selected = 0
-    tbp = None
-    while tbp is None:
-      try:
-        selected = int(input("Enter the index of the move you make: "))
-        tbp = allowed[selected] if selected >= 0 else []
-      except (ValueError, IndexError):
-        print("Invalid selection")
-        tbp = None
-    return tbp
+  # def humanPlay(self, allowed):
+  #   print("Your current hand is {}".format(self.hand))
+  #   if len(allowed) == 0:
+  #     print("You had to draw.")
+  #     myStr = "placeholder"
+  #     while myStr != "":
+  #       myStr = input("Press Enter to acknowledge...")
+  #     self.drawCard()
+  #     return None
+  #   print("You can do the following:")
+  #
+  #   for index, card in enumerate(allowed):
+  #     print("{} {}".format(index, card.__repr__()))
+  #   tbp = None
+  #   while tbp is None:
+  #     try:
+  #       selected = int(input("Enter the index of the move you make: "))
+  #       tbp = allowed[selected] if selected >= 0 else []
+  #     except (ValueError, IndexError):
+  #       print("Invalid selection")
+  #       tbp = None
+  #   return tbp
 
   def drawCard(self):
     try:

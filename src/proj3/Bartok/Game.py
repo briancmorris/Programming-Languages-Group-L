@@ -33,6 +33,9 @@ class Game(object):
     [self.players.append(Player(len(self.players), game=self, AI=len(self.players) >= numPlayers)) for i in
      range(numPlayers + numAI)]
 
+    for player in self.players:
+      self.defineMoves(player)
+
     for i in range(len(self.players)):
       self.players[i].setPrev(self.players[i - 1])
       self.players[i].setNext(self.players[(i + 1) % len(self.players)])
@@ -41,21 +44,13 @@ class Game(object):
     self.dealHands()
     self.played = [self.deck.draw().pop()]
 
-    #print("Last Played: " + self.played[0].rank + " of " + self.played[0].suit)
-   # print(self.players)
-
     player = self.players[0]
     while not self.endCondition():
       print("--------------------------------------")
       print("It is player " + str(player.idNum) + " turn")
       played = player.play(self.played[-1])
-      if played:
-        self.played.append(played)
-
-      player = self.playerPlayed(player, played)
-      if player.finished:
-        player.finished = False
-        player = player.next
+      if played: self.played.append(played)
+      player = self.playerPlayed(player, played) if played else self.cantPlay(player)
 
     self.winMessage()
 
@@ -71,6 +66,12 @@ class Game(object):
     self.played = keep
     print("+++++++++++++++++++++++++++deck refilled from discarded +++++++++++++++")
     print(self.played)
+
+  def defineMoves(self, player):
+    if player.AI:
+      player.AIFunction = self.defineAI
+    else:
+      player.humanFunction = self.defineHuman
 
   def endCondition(self):
     raise Exception("implemention must define this")
@@ -88,6 +89,12 @@ class Game(object):
     raise Exception("implemention must define this")
 
   def winMessage(self):
+    raise Exception("implementation must define this")
+
+  def defineAI(self, player, allowed, prevPlay):
+    raise Exception("implementation must define this")
+
+  def defineHuman(self, player, allowed, prevPlay):
     raise Exception("implementation must define this")
 
   def __str__(self):

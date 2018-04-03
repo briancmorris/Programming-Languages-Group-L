@@ -13,6 +13,8 @@ class Player(object):
     self.score = 0
     self.AI = AI
     self.finished = False
+    self.AIFunction = None
+    self.humanFunction = None
 
   def setPrev(self, prev):
     """
@@ -36,48 +38,11 @@ class Player(object):
     if not validPlays:
       return validPlays
     if not self.AI:
-      played = self.humanPlay(validPlays)
+      played = self.humanFunction(self, validPlays)
     else:
-      # AI logic goes here!
-      print("Dealer's hand is {}".format(self.hand))
-      print("Dealer's current hand score is {}".format(self.score))
-      if self.calculateScore() >= 17:
-        played = "stand"
-      else:
-        played = "hit"
-      # played = validPlays[0]
-    print("Player {}s". format(played))
-    if played == "hit":
-      self.drawCard()
-    else:
-      self.finished = True
+      played = self.AIFunction(self, validPlays)
 
     return played
-
-    # if type(played) is list or type(played) is tuple:
-    #   self.hand = [card for card in self.hand if card not in played]
-    # elif type(played) is Card:
-    #   print("removing cards")
-    #   self.hand = [card for card in self.hand if not card == played]
-    # return played
-
-  def humanPlay(self, allowed):
-    print("Your current hand is {}".format(self.hand))
-    print("Your current hand score is {}".format(self.score))
-    print("You can do the following:")
-    for action, i in zip(allowed, range(0,len(allowed))):
-      print("{} {}".format(i, action))
-    # for index, card in enumerate(allowed):
-    #   print("{} {}".format(index, card))
-    tbp = None
-    while tbp is None:
-      try:
-        selected = int(input("Enter the index of the move you make: "))
-        tbp = allowed[selected] if selected >= 0 else []
-      except (ValueError, IndexError):
-        print("Invalid selection")
-        tbp = None
-    return tbp
 
   def drawCard(self):
     try:
