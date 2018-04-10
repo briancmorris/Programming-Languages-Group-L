@@ -4,6 +4,13 @@ class Hand:
   def __init__(self):
     self.cards = []
 
+  def __iter__(self):
+    return iter(self.cards)
+
+  def __getitem__(self, index):
+    """ Allows the fetching of cards by index """
+    return self.cards[index]
+
   def __repr__(self):
     """
     Determines how to print the Hand as a string.

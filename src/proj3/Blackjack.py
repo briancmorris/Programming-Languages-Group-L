@@ -128,13 +128,13 @@ class Blackjack(Game):
 
     player.score = 0
 
-    for card in player.hand.cards:
+    for card in player.hand:
       if card.score > 10:
         player.score += 10
       else:
         player.score += card.score
 
-    if containsAce(player.hand.cards):
+    if containsAce(player.hand):
       if player.score + 10 <= 21:
         player.score += 10
 
