@@ -5,18 +5,25 @@ import random
 class Deck(object):
   def __init__(self):
     self.cards = [Card(rank, suit) for suit in suits for rank in ranks]
-    self.cards = self.cards[0:53]
     self.shuffle()
 
   def shuffle(self, seed=10):
     self.seed = seed
     random.shuffle(self.cards, random.seed(self.seed))
 
-  def draw(self, amount=1):
-    return [self.cards.pop() for _ in range(amount)]
+  def __iter__(self):
+    return iter(self.cards)
+
+  def __getitem__(self, index):
+    """ Allows the fetching of cards by index """
+    return self.cards[index]
+
+  def draw(self, hand, amount=1):
+    for i in range(amount):
+      hand.cards.append(self.cards.pop())
 
   def cardsLeft(self):
-    return len(self.cards) != 0
+    return len(self.cards) > 0
 
   def refill(self, discarded):
     self.cards = self.cards + discarded

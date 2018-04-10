@@ -1,4 +1,4 @@
-from Card import Card
+from Hand import Hand
 
 
 class Player(object):
@@ -9,7 +9,7 @@ class Player(object):
   def __init__(self, idNum, game, AI=False):
     self.idNum = idNum
     self.game = game
-    self.hand = []
+    self.hand = Hand()
     self.score = 0
     self.AI = AI
     self.finished = False
@@ -47,41 +47,19 @@ class Player(object):
     try:
       if not self.game.deck.cardsLeft():
         self.game.refillDeck()
-      self.hand += self.game.deck.draw()
+      self.game.deck.draw(self.hand)
     except:
       print("No more cards left in deck and no cards to refill deck with")
 
   def noCardsLeft(self):
-    return len(self.hand) == 0
-
-  def calculateScore(self):
-    def containsAce(hand):
-      """ Helper method, determines if an Ace is present """
-      for card in hand:
-        if card.rank == 'A':
-          return True
-      return False
-
-    self.score = 0
-
-    for card in self.hand:
-      if card.score > 10:
-        self.score += 10
-      else:
-        self.score += card.score
-
-    if containsAce(self.hand):
-      if self.score + 10 <= 21:
-        self.score += 10
-
-    return self.score
+    return len(self.hand.cards) == 0
 
   def __repr__(self):
     return self.__str__()
 
   def __str__(self):
     out = 'Player: ' + str(self.idNum)
-    out += '\nHand: ' + str(self.hand)
+    out += '\nHand: ' + str(self.hand.cards)
     out += '\nAI: ' + str(self.AI)
     out += '\nNext Player: ' + str(self.next.idNum)
     out += '\nPrev Player: ' + str(self.prev.idNum)

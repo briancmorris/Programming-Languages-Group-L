@@ -42,7 +42,7 @@ class Game(object):
 
   def play(self):
     self.dealHands()
-    self.played = [self.deck.draw().pop()]
+    self.played = [self.deck.cards.pop()]
 
     player = self.players[0]
     while not self.endCondition():
@@ -74,6 +74,9 @@ class Game(object):
       player.humanFunction = self.defineHuman
 
   def endCondition(self):
+    raise Exception("implemention must define this")
+
+  def calculateScore(self, player):
     raise Exception("implemention must define this")
 
   def validPlays(self, player):

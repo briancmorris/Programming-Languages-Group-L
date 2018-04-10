@@ -12,9 +12,9 @@ class Blackjack(Game):
       # Define Player win condition
       if not player.AI:
         if player.finished:
-          if (player.calculateScore() < self.findDealer().calculateScore() <= 21) or player.calculateScore() > 21:
+          if (self.calculateScore(player) < self.calculateScore(self.findDealer()) <= 21) or self.calculateScore(player) > 21:
             self.losers.append(player)
-          elif player.calculateScore() > self.findDealer().calculateScore() or self.findDealer().calculateScore() > 21:
+          elif self.calculateScore(player) > self.calculateScore(self.findDealer()) or self.calculateScore(self.findDealer()) > 21:
             self.winners.append(player)
           else:
             self.tied.append(player)
@@ -45,7 +45,7 @@ class Blackjack(Game):
   def validPlays(self, player, lastPlayed):
     validPlays = []
 
-    if player.calculateScore() > 21:
+    if self.calculateScore(player) > 21:
       # Redundant but helps sort things out mentally
       return None
     else:
@@ -68,7 +68,7 @@ class Blackjack(Game):
   def dealHands(self):
     self.deck.shuffle()
     for player in self.players:
-      player.hand = self.deck.draw(2)
+      self.deck.draw(player.hand, 2)
 
   # Made for Blackjack
   def findDealer(self):
@@ -78,9 +78,9 @@ class Blackjack(Game):
 
   def defineAI(self, player, allowed, prevPlay):
     # AI logic goes here!
-    print("Dealer's hand is {}".format(player.hand))
+    print("Dealer's hand is:\n{}".format(player.hand))
     print("Dealer's current hand score is {}".format(player.score))
-    if player.calculateScore() >= 17:
+    if self.calculateScore(player) >= 17:
       played = "stand"
     else:
       played = "hit"
@@ -94,7 +94,7 @@ class Blackjack(Game):
     return played
 
   def defineHuman(self, player, allowed, prevPlay):
-    print("Your current hand is {}".format(player.hand))
+    print("Your current hand is :\n{}".format(player.hand))
     print("Your current hand score is {}".format(player.score))
     print("You can do the following:")
     for action, i in zip(allowed, range(0,len(allowed))):
@@ -117,5 +117,27 @@ class Blackjack(Game):
       player.finished = True
 
     return tbp
+
+  def calculateScore(self, player):
+    def containsAce(hand):
+      """ Helper method, determines if an Ace is present """
+      for card in hand:
+        if card.rank == 'A':
+          return True
+      return False
+
+    player.score = 0
+
+    for card in player.hand.cards:
+      if card.score > 10:
+        player.score += 10
+      else:
+        player.score += card.score
+
+    if containsAce(player.hand.cards):
+      if player.score + 10 <= 21:
+        player.score += 10
+
+    return player.score
 
 Blackjack(numPlayers=1, numAI=1).play()
