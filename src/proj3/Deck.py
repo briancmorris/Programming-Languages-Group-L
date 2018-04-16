@@ -1,11 +1,12 @@
 from Card import *
 import random
+from sys import maxsize
 
 
 class Deck(object):
   def __init__(self):
     self.cards = [Card(rank, suit) for suit in suits for rank in ranks]
-    self.shuffle()
+    self.shuffle(random.randint(0, maxsize))
 
   def shuffle(self, seed=10):
     self.seed = seed
