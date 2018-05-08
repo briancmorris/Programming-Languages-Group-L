@@ -43,7 +43,11 @@ class Bartok(Game):
       return None
 
     if len(allowed) > 0:
-      played = allowed[0]
+      for card in allowed:
+        if card.rank in {'K','Q','J'}:
+          played = card
+        else:
+          played = allowed[0]
       print("Played \n%s" % played.__repr__())
     else:
       player.drawCard()
@@ -61,6 +65,7 @@ class Bartok(Game):
       return None
 
     print("Your current hand is \n{}".format(player.hand))
+    print("The top of the discard pile is \n{}".format(self.played[-1]))
     if len(allowed) == 0:
       print("No valid moves, you have to draw.")
       myStr = "placeholder"
