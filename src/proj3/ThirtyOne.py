@@ -1,5 +1,6 @@
 from Game import Game
 
+
 class ThirtyOne(Game):
 
   def endCondition(self):
@@ -44,7 +45,7 @@ class ThirtyOne(Game):
     """Player draws from discard pile, must discard a different card afterward."""
     card = self.discardPile.pop()
     player.hand.cards.append(card)
-    print("Player " + str(player.idNum) + " drew\n" + card.__repr__())
+    print("Player " + str(player.idNum) + " took:\n" + card.__repr__())
 
   def knock(self, player):
     """Player knocks, each player has one round left to change their hand."""
@@ -84,15 +85,18 @@ class ThirtyOne(Game):
       print("--------------------------------------")
       print("        End of Round Results          ")
       print("--------------------------------------")
-      #Redeal hands.
+      # Redeal hands.
+      for player in self.players:
+        player.hand.cards = []
       self.dealHands()
+
       numLosers = 0
       # Subtract a life from the players that do not share the high score.
       for j in range(len(highScoreMatches)):
         if highScoreMatches[j] == 0:
           self.lives[j] -= 1
           print("Player " + str(j) + " now has " + str(self.lives[j]) + " lives!")
-          numLosers +=1
+          numLosers += 1
       if numLosers == 0:
         print("Draw! No one lost a life!")
       self.theOneWhoKnocked = None
@@ -106,7 +110,7 @@ class ThirtyOne(Game):
     # Clubs, Spades, Diamonds, Hearts
     scoresOfSuit = {'Clubs': 0, 'Spades': 0, 'Diamonds': 0, 'Hearts': 0}
     # Calculate the score of each suit. (P.S. I'm sorry)
-    for card in player.hand:
+    for card in player.hand.cards:
       tmpScore = 0
       if card.rank == "A":
         tmpScore += 11
@@ -134,6 +138,7 @@ class ThirtyOne(Game):
       return highScore
 
   def defineHuman(self, player, allowed, prevPlay):
+    """Defines the actions a human can take."""
     # Player has been eliminated.
     if len(allowed) == 0:
       print("You have already been eliminated!")
@@ -146,7 +151,7 @@ class ThirtyOne(Game):
     print("You can do the following:")
 
     if len(allowed) == 3:
-      print("Draw a card from the stock pile (0), draw a card from the discard pile (1), or knock (2).")
+      print("Draw a card from the stock pile (0), draw the top card from the discard pile (1), or knock (2).")
     # Player can't knock, someone already did.
     else:
       print("Draw a card from the stock pile (0) or draw a card from the discard pile (1).")
@@ -172,7 +177,10 @@ class ThirtyOne(Game):
       discarded = None
       while discarded is None:
         try:
-          cardSelected = int(input("Enter the index of the move you make: "))
+          cardSelected = int(input("Enter the index of the card to discard: "))
+          if cardSelected == 3 and action == allowed[1]:
+            print("Invalid selection. You cannot discard the card you just took from the discard pile!")
+            continue
           discarded = player.hand[cardSelected] if cardSelected >= 0 else None
         except (ValueError, IndexError):
           print("Invalid selection.")
@@ -183,16 +191,54 @@ class ThirtyOne(Game):
     else:
       self.playerPlayed(player, None)
 
-
   def defineAI(self, player, allowed, prevPlay):
+    """Defines basic AI behavior. Knocks if score is >= 28, draws from discard pile if it will
+       provide the player with a better hand, and draws from the deck if not."""
+    # Player eliminated.
     if len(allowed) == 0:
       print("Player " + str(player.idNum) + " has already been eliminated!")
       return None
 
+    # Handle possible options.
     else:
-      allowed[0](player)
-      discarded = player.hand[0]
-      player.hand.cards.remove(discarded)
-      self.playerPlayed(player, discarded)
+      # Current hand's score.
+      currentScore = self.calculateScore(player)
+      # If the current score is reasonably high, knock.
+      if currentScore >= 28 and len(allowed) > 2:
+        allowed[2](player)
+        self.playerPlayed(player, None)
+        return None
+      # Time to check for potentially better scores on the discard pile.
+      else:
+        currentHand = player.hand.cards
+        topDiscarded = self.discardPile.pop()
+        for card in player.hand.cards:
+          player.hand.cards.remove(card)
+          player.hand.cards.append(topDiscarded)
+          tempScore = self.calculateScore(player)
+
+          # Remove the discard pile card from hand.
+          player.hand.cards.remove(topDiscarded)
+
+          # If the score is better than before, take the discarded card.
+          if tempScore > currentScore:
+            # Call the drawFromDiscard function.
+            self.discardPile.append(topDiscarded)
+            allowed[1](player)
+            self.discardPile.append(card)
+            self.playerPlayed(player, card)
+            return None
+
+        # The discarded card did not provide a higher score, add it back to the pile.
+        self.discardPile.append(topDiscarded)
+        # Reset player hand.
+        player.hand.cards = currentHand
+
+        # Draw from deck and discard the first card in hand.
+        allowed[0](player)
+        discarded = player.hand.cards[0]
+        player.hand.cards.remove(discarded)
+        self.playerPlayed(player, discarded)
+
 
 ThirtyOne(numPlayers=1, numAI=1).play()
