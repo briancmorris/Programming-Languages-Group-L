@@ -3,7 +3,7 @@ import random
 
 class RollingStone(Game):
     startPlayer = None
-    discardPile = []
+    wastePile = []
 
     def endCondition(self):
         for player in self.players:
@@ -98,16 +98,19 @@ class RollingStone(Game):
                 played = allowed[m]
 
             print("Played \n%s" % played.__repr__())
+            myStr = "placeholder"
+            while myStr != "":
+                myStr = input("Press Enter to acknowledge...")
         else:
             print("Had no valid moves and took the pile.\n")
             played = None
+            myStr = "placeholder"
+            while myStr != "":
+                myStr = input("Press Enter to acknowledge...")
         return played
 
     def defineHuman(self, player, allowed, prevPlay):
         print("Your current hand is \n{}".format(player.hand))
-        #print("P1 \n{}".format(player.next.hand))
-        #print("P2 \n{}".format(player.next.next.hand))
-        #print("P3 \n{}".format(player.next.next.next.hand))
         if len(allowed) == 0:
             print("No valid moves, you have to take all the cards.")
             myStr = "placeholder"
@@ -151,11 +154,11 @@ class RollingStone(Game):
                 p = p.next
             self.startPlayer = p
 
-            print("Everyone went and Player {} played the highest card so they take the deck!".format(p.idNum))
+            print("Everyone went and Player {} played the highest card. They move the trick to the waste pile!".format(p.idNum))
 
             # Add cards to the players hand
             for card in self.discardPile:
-                p.hand.cards.append(card)
+                self.wastePile.append(card)
 
             self.discardPile = []
             # Return the player

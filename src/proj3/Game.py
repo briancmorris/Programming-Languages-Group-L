@@ -28,6 +28,11 @@ class Game(object):
     self.losers = []
     self.tied = []
 
+    # For games with lives and discard piles.
+    self.lives = [3 for i in range(self.totPlayers)]
+    self.discardPile = []
+    self.theOneWhoKnocked = None
+
     # setting up the players
     self.players = []
     [self.players.append(Player(len(self.players), game=self, AI=len(self.players) >= numPlayers)) for i in
