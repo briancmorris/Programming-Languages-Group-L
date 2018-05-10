@@ -69,7 +69,7 @@ class Game(object):
 
     self.deck.refill(add)
     self.played = keep
-    print("+++++++++++++++++++++++++++deck refilled from discarded +++++++++++++++")
+    # print("+++++++++++++++++++++++++++deck refilled from discarded +++++++++++++++")
     print(self.played)
 
   def defineMoves(self, player):

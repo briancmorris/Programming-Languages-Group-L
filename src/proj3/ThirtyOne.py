@@ -64,6 +64,10 @@ class ThirtyOne(Game):
     if played is not None:
       print("Player " + str(player.idNum) + " discarded\n" + played.__repr__())
       self.discardPile.append(played)
+      if player.AI:
+        myStr = "placeholder"
+        while myStr != "":
+          myStr = input("Press Enter to acknowledge...")
     if player.next == self.theOneWhoKnocked:
       # Get the scores of all players.
       scores = []
@@ -100,6 +104,9 @@ class ThirtyOne(Game):
       if numLosers == 0:
         print("Draw! No one lost a life!")
       self.theOneWhoKnocked = None
+      myStr = "placeholder"
+      while myStr != "":
+        myStr = input("Press Enter to acknowledge...")
       return player.next
     else:
       return player.next
@@ -204,7 +211,7 @@ class ThirtyOne(Game):
       # Current hand's score.
       currentScore = self.calculateScore(player)
       # If the current score is reasonably high, knock.
-      if currentScore >= 28 and len(allowed) > 2:
+      if currentScore >= 24 and len(allowed) > 2:
         allowed[2](player)
         self.playerPlayed(player, None)
         return None
